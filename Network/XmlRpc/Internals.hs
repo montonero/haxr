@@ -101,6 +101,14 @@ eitherToM   _ (Right x) = return x
 xmlRpcDateFormat :: String
 xmlRpcDateFormat = "%Y%m%dT%H:%M:%S"
 
+xmlRpcDateFormats :: [String]
+xmlRpcDateFormats = [xmlRpcDateFormat, "%Y-%m-%dT%H:%M:%S"]
+
+parseTimeFormats :: [String] -> String -> Maybe LocalTime
+parseTimeFormats fmts t = listToMaybe $ catMaybes l
+    where
+        l = map (flip (parseTimeM True defaultTimeLocale) t) fmts
+
 --
 -- Error monad stuff
 --
@@ -512,7 +520,10 @@ readDateTime dt =
     maybe
         (fail $ "Error parsing dateTime '" ++ dt ++ "'")
         return
-        (parseTime defaultTimeLocale xmlRpcDateFormat dt)
+        (parseTimeFormats xmlRpcDateFormats dt)
+        
+
+--(parseTime defaultTimeLocale xmlRpcDateFormat dt)
 
 localTimeToCalendarTime :: LocalTime -> CalendarTime
 localTimeToCalendarTime l =
